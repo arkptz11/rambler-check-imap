@@ -7,3 +7,4 @@ opencv-python
 requests
 openpyxl
 selenium-wire
+selen_utils
