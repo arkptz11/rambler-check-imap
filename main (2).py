@@ -82,5 +82,7 @@ class Rambler(Flow):
                 '/html/body/div[4]/div/div/div/form/footer/button[1]')
             sleep(2)
             return True
-Rambler(data_cl('2:2'), Proxy_Class('ro.dc.smartproxy.com:20001:user-sp34092641:123456789xXxX|google.com'), multiprocessing.Lock(), []).start_driver(anticaptcha_on=True)
+r = Rambler(data_cl('2:2'), Proxy_Class('ro.dc.smartproxy.com:20001:user-sp34092641:123456789xXxX|google.com'), multiprocessing.Lock(), [])
+r.start_driver(anticaptcha_on=True)
+r.activate_anti_captcha()
 sleep(10000)
