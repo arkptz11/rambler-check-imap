@@ -1,0 +1,9 @@
+pandas
+loguru
+selenium
+pyautogui
+pillow
+opencv-python
+requests
+openpyxl
+selenium-wire
