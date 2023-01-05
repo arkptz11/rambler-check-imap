@@ -55,7 +55,7 @@ class Flow:
             options_c.add_extension(
                 anticaptcha_path)
         self.driver = webdriver.Chrome(
-            options=options_c, seleniumwire_options=options)
+            options=options_c, seleniumwire_options=options, service_log_path='NUL')
         self.driver.set_window_size(1700, 1080)
         self.wait = WebDriverWait(self.driver, 30)
         self.proxy.change_ip()
@@ -131,8 +131,11 @@ class Flow:
         # 'result':res})
         if res != 'Success':
             # logger.error(f'{self.counter.value}/{self.all_seeds}')
-            self.driver.save_screenshot(
-                f'{homeDir}\\Screenshots_error\\{self.data.login}.png')
+                try:self.driver.save_screenshot(
+                    f'{homeDir}\\Screenshots_error\\{self.data.login}.png')
+                except Exception as e:
+                    log.debug(e)
+                    pass
         for _ in range(100):
             try:
                 self.driver.switch_to.window(self.driver.window_handles[-1])

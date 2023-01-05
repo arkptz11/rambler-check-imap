@@ -59,7 +59,7 @@ class Execute:
         self.formater = formater
         self.csv = CsvCheck(name_file=self.name_csv_file,
                              colums_check=self.list_columns, Lock=multiprocessing.Lock())
-
+        self.csv.check_csv()
     def get_queue(self) -> multiprocessing.Queue:
         counter = 0
         q = queue.Queue()
