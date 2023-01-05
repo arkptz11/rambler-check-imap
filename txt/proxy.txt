@@ -1,1 +1,1 @@
-ro.dc.smartproxy.com:20001:user-sp34092641:123456789xXxX|google.com
+45.152.118.38:62816:avNSEhYS:XcX1215C|https://google.com

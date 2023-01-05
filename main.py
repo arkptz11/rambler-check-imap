@@ -22,8 +22,7 @@ import pandas as pd
 from time import sleep, time
 import random
 import multiprocessing
-from Utility.proxy import Proxy_Class
-from Utility.data_class import data_cl
+
 import warnings
 ua = UserAgent()
 warnings.filterwarnings("ignore")
