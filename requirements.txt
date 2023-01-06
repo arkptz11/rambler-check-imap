@@ -1,9 +1,7 @@
-pandas
-loguru
+pandas=1.5.2
+loguru=0.6.0
 selenium
-pyautogui
-pillow
-opencv-python
 requests
 openpyxl
 selenium-wire
+dataclasses=0.6
