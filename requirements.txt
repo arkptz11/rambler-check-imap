@@ -6,3 +6,4 @@ openpyxl
 selenium-wire
 dataclasses==0.6
 fake_useragent
+loguru
