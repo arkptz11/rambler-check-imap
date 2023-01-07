@@ -46,6 +46,7 @@ class CsvCheck:
     def add_string(self, data):
         self.df = self.df.append(data, ignore_index=True)
 
+
 @dataclass(repr=True)
 class Execute:
     name_file: str
@@ -58,8 +59,9 @@ class Execute:
         self.name_file, self.name_csv_file, self.list_columns, self.target_column = name_file, name_csv_file, list_columns, target_column
         self.formater = formater
         self.csv = CsvCheck(name_file=self.name_csv_file,
-                             colums_check=self.list_columns, Lock=multiprocessing.Lock())
+                            colums_check=self.list_columns, Lock=multiprocessing.Lock())
         self.csv.check_csv()
+
     def get_queue(self) -> multiprocessing.Queue:
         counter = 0
         q = queue.Queue()

@@ -70,9 +70,9 @@ class Flow:
             return ''
         elif '-' in d:
             first, two = map(float, d.split('-'))
-            sleep(random.randint(int(round(first*60,0)), int(round(two*60,0))))
+            sleep(random.randint(int(round(first*60, 0)), int(round(two*60, 0))))
         else:
-            sleep(int(round(float(d)*60,0)))
+            sleep(int(round(float(d)*60, 0)))
 
     def activate_anti_captcha(self,):
         self.get_new('https://httpbin.org/ip')
@@ -97,6 +97,39 @@ class Flow:
             return 1
         except Exception as e:
             return 2
+
+    def check_frame_and_window(self, frame, frame_elem, window, window_elem, timeout=30):
+        time_start = time()
+        while time() - time_start < timeout:
+            self.driver.switch_to.window(window)
+            try:
+                self.driver.switch_to.frame(frame)
+                self.driver.find_element(By.XPATH, frame_elem)
+                return 1
+            except Exception as e:
+                pass
+            self.driver.switch_to.window(window)
+            try:
+                self.driver.find_element(By.XPATH, window_elem)
+                return 2
+            except Exception as e:
+                pass
+        raise
+
+    def wait_3_elements(self, first_elem, second_elem, third_elem) -> int:
+        self.wait.until(EC.any_of(lambda x: x.find_element(
+            By.XPATH, first_elem),
+            lambda x: x.find_element(By.XPATH, second_elem),
+            lambda x: x.find_element(By.XPATH, third_elem)))
+        try:
+            self.driver.find_element(By.XPATH, first_elem)
+            return 1
+        except Exception as e:
+            try:
+                self.driver.find_element(By.XPATH, second_elem)
+                return 2
+            except Exception as e:
+                return 3
 
     def wait_and_return_elem(self, xpath, sec=30, sleeps=None):
         self.wait = WebDriverWait(self.driver, sec)
@@ -132,11 +165,12 @@ class Flow:
         # 'result':res})
         if res != 'Success':
             # logger.error(f'{self.counter.value}/{self.all_seeds}')
-                try:self.driver.save_screenshot(
+            try:
+                self.driver.save_screenshot(
                     f'{homeDir}\\Screenshots_error\\{self.data.login}.png')
-                except Exception as e:
-                    log.debug(e)
-                    pass
+            except Exception as e:
+                log.debug(e)
+                pass
         for _ in range(100):
             try:
                 self.driver.switch_to.window(self.driver.window_handles[-1])

@@ -15,7 +15,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 from dataclasses import dataclass
-
+import traceback
 import os
 import pandas as pd
 from time import sleep, time
@@ -59,19 +59,26 @@ class Rambler(Flow):
         except Exception as e:
             print(e)
             pass
+        ans = self.check_frame_and_window(frame, '//div[@class="rui-FieldStatus-message"]', cur, '//a[@data-list-view="settings"]')
+        if ans == 1:
+            return 'Невалид'
         self.driver.switch_to.window(cur)
-        self.wait_and_return_elem('//a[@data-list-view="settings"]')
 
     def switch_imap(self):
         self.go_setting()
+        log.debug(f'{self.data} -- go_setting')
         self.wait_click('//a[@href="/settings/mailapps"]')
+        log.debug(f'{self.data} -- mailapps')
         elem = self.wait_and_return_elem(
             '//button[contains(@class, "rui-ToggleOption-toggleOption") and @value="true"]', sleeps=5)
+        log.debug(f'{self.data} -- ищем элем вкл')
         val = elem.get_attribute('aria-pressed')
         if val == 'true':
+            log.debug(f'{self.data} -- imap уже включён')
             return True
         else:
             elem.click()
+            log.debug(f'{self.data} -- кликнули по элементу, ждём капчу')
             if not Captcha.captcha_check(self.driver):
                 return False
             else:
@@ -109,7 +116,9 @@ class Rambler(Flow):
             anticaptcha_on=True, anticaptcha_path=f'{homeDir}\\files\\anticaptcha-plugin_v0.63.zip')
         self.activate_anti_captcha()
         log.debug('activate anti-captcha')
-        self.login_rambler()
+        _login = self.login_rambler()
+        if _login == 'Невалид':
+            return _login
         log.debug('login rambler')
         if self.data.on_off_imap:
             if self.check_imap(self.data.login, self.data.password):
@@ -130,9 +139,9 @@ class Rambler(Flow):
                     else:
                         self.get_new(
                             'https://mail.rambler.ru/folder/INBOX')
-                        sleep(10)
+                        sleep(5)
                 log.success('end')
-        if self.data.change_pass:
+        if self.data.change_pass and self.check_imap(self.data.login, self.data.password):
             for i in range(3):
                 change_pass = self.change_pass()
                 if change_pass:
