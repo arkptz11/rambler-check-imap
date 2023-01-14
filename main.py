@@ -116,7 +116,10 @@ class Rambler(Flow):
             anticaptcha_on=True, anticaptcha_path=f'{homeDir}\\files\\anticaptcha-plugin_v0.63.zip')
         self.activate_anti_captcha()
         log.debug('activate anti-captcha')
-        _login = self.login_rambler()
+        try:
+            _login = self.login_rambler()
+        except:
+            sleep(10000)
         if _login == 'Невалид':
             return _login
         log.debug('login rambler')
