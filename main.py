@@ -116,12 +116,15 @@ class Rambler(Flow):
             anticaptcha_on=True, anticaptcha_path=f'{homeDir}\\files\\anticaptcha-plugin_v0.63.zip')
         self.activate_anti_captcha()
         log.debug('activate anti-captcha')
-        try:
-            _login = self.login_rambler()
-        except:
-            sleep(10000)
-        if _login == 'Невалид':
-            return _login
+        for i in range(3):
+            try:
+                _login = self.login_rambler()
+                if _login == 'Невалид':
+                    return _login
+                break
+            except:
+                if i ==2:
+                    return 'Error'
         log.debug('login rambler')
         if self.data.on_off_imap:
             if self.check_imap(self.data.login, self.data.password):
