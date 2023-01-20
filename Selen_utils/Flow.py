@@ -98,6 +98,15 @@ class Flow:
         except Exception as e:
             return 2
 
+    def close_driver(self):
+        for _ in range(100):
+            try:
+                self.driver.switch_to.window(self.driver.window_handles[-1])
+                self.driver.close()
+            except:
+                break
+                pass
+
     def check_frame_and_window(self, frame, frame_elem, window, window_elem, timeout=30):
         time_start = time()
         while time() - time_start < timeout:
@@ -171,13 +180,7 @@ class Flow:
             except Exception as e:
                 log.debug(e)
                 pass
-        for _ in range(100):
-            try:
-                self.driver.switch_to.window(self.driver.window_handles[-1])
-                self.driver.close()
-            except:
-                break
-                pass
+        self.close_driver()
         self.proxy_list.append(self.proxy)
         self.Lock.acquire()
         df = pd.read_excel(rf'{homeDir}\\result.xlsx', index_col=0)

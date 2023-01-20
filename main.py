@@ -29,6 +29,7 @@ homeDir = (r'\\').join(os.path.abspath(__file__).split('\\')[:-1])
 datas = cf.datas
 csv = cf.csv
 
+
 class Rambler(Flow):
     def go_setting(self):
         self.wait_click('//a[@data-list-view="settings"]')
@@ -59,7 +60,8 @@ class Rambler(Flow):
         except Exception as e:
             print(e)
             pass
-        ans = self.check_frame_and_window(frame, '//div[@class="rui-FieldStatus-message"]', cur, '//a[@data-list-view="settings"]')
+        ans = self.check_frame_and_window(
+            frame, '//div[@class="rui-FieldStatus-message"]', cur, '//a[@data-list-view="settings"]')
         if ans == 1:
             return 'Невалид'
         self.driver.switch_to.window(cur)
@@ -110,11 +112,15 @@ class Rambler(Flow):
         except Exception as e:
             return False
 
-    def go(self,):
-        log.debug(f'Старт потока {self.data}')
+    def restart_driver(self):
+        self.close_driver()
         self.start_driver(
             anticaptcha_on=True, anticaptcha_path=f'{homeDir}\\files\\anticaptcha-plugin_v0.63.zip')
         self.activate_anti_captcha()
+
+    def go(self,):
+        log.debug(f'Старт потока {self.data}')
+        self.restart_driver()
         log.debug('activate anti-captcha')
         for i in range(3):
             try:
@@ -123,7 +129,8 @@ class Rambler(Flow):
                     return _login
                 break
             except:
-                if i ==2:
+                self.restart_driver()
+                if i == 2:
                     return 'Error'
         log.debug('login rambler')
         if self.data.on_off_imap:
@@ -203,7 +210,7 @@ if __name__ == '__main__':
                     # proxx.change_ip()
                     proxy_list.remove(proxx)
                     t = multiprocessing.Process(
-                        target=Rambler(data, proxx, Lock, proxy_list,delay).start)
+                        target=Rambler(data, proxx, Lock, proxy_list, delay).start)
                     t.start()
                     flow += 1
         while len(multiprocessing.active_children()) != 1:
