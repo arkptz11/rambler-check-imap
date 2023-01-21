@@ -44,6 +44,7 @@ class CsvCheck:
         self.Lock.release()
 
     def add_string(self, data):
+        self.update_df()
         self.Lock.acquire()
         self.df = self.df.append(data, ignore_index=True)
         self.Lock.release()
