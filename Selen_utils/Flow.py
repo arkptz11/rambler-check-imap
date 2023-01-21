@@ -20,6 +20,7 @@ import os
 import pandas as pd
 from time import sleep, time
 import random
+import traceback
 import warnings
 ua = UserAgent()
 warnings.filterwarnings("ignore")
@@ -38,8 +39,8 @@ class Flow:
     wait: WebDriverWait = None
     ip: str = None
     csv: CsvCheck = None
-    count_accs:int = None
-    count_make_accs:multiprocessing.Value = None
+    count_accs: int = None
+    count_make_accs: multiprocessing.Value = None
 
     def start_driver(self, anticaptcha_on=False, anticaptcha_path=None):
         self.activate_delay()
@@ -56,7 +57,8 @@ class Flow:
                    {'http': f'http://{self.proxy.url_proxy}',
                     'http': f'https://{self.proxy.url_proxy}', }}
         options_c.add_argument(f"user-agent={ua.random}")
-        options_c.add_experimental_option('excludeSwitches', ['enable-logging'])
+        options_c.add_experimental_option(
+            'excludeSwitches', ['enable-logging'])
         if anticaptcha_on:
             options_c.add_extension(
                 anticaptcha_path)
@@ -90,7 +92,7 @@ class Flow:
                 self.driver.get(link)
                 return True
             except Exception as e:
-                log.debug(f'get_new -- {e}')
+                log.debug(f'{self.data} -- get_new -- {traceback.format_exc()}')
             if num == 14:
                 raise Exception
 
@@ -105,13 +107,10 @@ class Flow:
             return 2
 
     def close_driver(self):
-        for _ in range(100):
-            try:
-                self.driver.switch_to.window(self.driver.window_handles[-1])
-                self.driver.close()
-            except:
-                break
-                pass
+        try:
+            self.driver.quit()
+        except:
+            pass
 
     def check_frame_and_window(self, frame, frame_elem, window, window_elem, timeout=30):
         time_start = time()
@@ -172,22 +171,22 @@ class Flow:
                 res = func()
             except Exception as e:
                 res = "Error"
-                log.debug(e)
+                log.debug(f'{self.data} -- {traceback.format_exc()}')
                 break
             if res != 'Success':
                 break
         # self.Logs_to_excel.append({'seed': self.seed,
         # 'result':res})
-        self.count_make_accs.value +=1
-        txt = f'{self.count_make_accs.value}/{self.count_accs}'
+        self.count_make_accs.value += 1
+        txt = f'{self.data} -- {self.count_make_accs.value}/{self.count_accs}'
         if res != 'Success':
             print(Fore.RED + txt)
-            log.error(txt)
+            log.error(f'{self.data} -- {txt}')
             try:
                 self.driver.save_screenshot(
                     f'{homeDir}\\Screenshots_error\\{self.data.login}.png')
             except Exception as e:
-                log.debug(e)
+                log.debug(f'{self.data} -- {traceback.format_exc()}')
                 pass
         else:
             print(Fore.GREEN + txt)

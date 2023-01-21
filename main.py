@@ -132,7 +132,7 @@ class Rambler(Flow):
                 self.restart_driver()
                 if i == 2:
                     return 'Error'
-        log.debug('login rambler')
+        log.debug(f'{self.data} -- login rambler')
         if self.data.on_off_imap:
             if self.check_imap(self.data.login, self.data.password):
                 self.data.on_off_imap = 'Уже был включен'
@@ -142,7 +142,7 @@ class Rambler(Flow):
                     if imap_on:
                         sleep(5)
                         if self.check_imap(self.data.login, self.data.password):
-                            log.success('imap включён')
+                            log.success(f'{self.data} -- imap включён')
                             self.data.on_off_imap = 'Success'
                             break
                         else:
@@ -153,18 +153,18 @@ class Rambler(Flow):
                         self.get_new(
                             'https://mail.rambler.ru/folder/INBOX')
                         sleep(5)
-                log.success('end')
+                log.success(f'{self.data} -- end')
         if self.data.change_pass and self.check_imap(self.data.login, self.data.password):
             for i in range(3):
                 change_pass = self.change_pass()
                 if change_pass:
                     sleep(5)
                     if self.check_imap(self.data.login, self.data.new_password):
-                        log.success('пас поменяли')
+                        log.success(f'{self.data} -- пас поменяли')
                         self.data.change_pass = 'Success'
                         break
                     else:
-                        log.error('Пас не сменился')
+                        log.error(f'{self.data} -- Пас не сменился')
                         self.data.change_pass = 'Error'
                         change_pass = False
         return 'Success'
