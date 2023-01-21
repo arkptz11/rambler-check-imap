@@ -15,6 +15,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 from dataclasses import dataclass
+from colorama import Fore
 import os
 import pandas as pd
 from time import sleep, time
@@ -37,6 +38,8 @@ class Flow:
     wait: WebDriverWait = None
     ip: str = None
     csv: CsvCheck = None
+    count_accs:int = None
+    count_make_accs:multiprocessing.Value = None
 
     def start_driver(self, anticaptcha_on=False, anticaptcha_path=None):
         self.activate_delay()
@@ -53,6 +56,7 @@ class Flow:
                    {'http': f'http://{self.proxy.url_proxy}',
                     'http': f'https://{self.proxy.url_proxy}', }}
         options_c.add_argument(f"user-agent={ua.random}")
+        options_c.add_experimental_option('excludeSwitches', ['enable-logging'])
         if anticaptcha_on:
             options_c.add_extension(
                 anticaptcha_path)
@@ -174,14 +178,19 @@ class Flow:
                 break
         # self.Logs_to_excel.append({'seed': self.seed,
         # 'result':res})
+        self.count_make_accs.value +=1
+        txt = f'{self.count_make_accs.value}/{self.count_accs}'
         if res != 'Success':
-            # logger.error(f'{self.counter.value}/{self.all_seeds}')
+            print(Fore.RED + txt)
+            log.error(txt)
             try:
                 self.driver.save_screenshot(
                     f'{homeDir}\\Screenshots_error\\{self.data.login}.png')
             except Exception as e:
                 log.debug(e)
                 pass
+        else:
+            print(Fore.GREEN + txt)
         self.close_driver()
         self.proxy_list.append(self.proxy)
         self.Lock.acquire()

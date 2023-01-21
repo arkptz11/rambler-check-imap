@@ -210,7 +210,7 @@ if __name__ == '__main__':
                     # proxx.change_ip()
                     proxy_list.remove(proxx)
                     t = multiprocessing.Process(
-                        target=Rambler(data, proxx, Lock, proxy_list, delay, csv=csv).start)
+                        target=Rambler(data, proxx, Lock, proxy_list, delay, csv=csv, count_accs=datas.count_args, count_make_accs=counter).start)
                     t.start()
                     flow += 1
         while len(multiprocessing.active_children()) != 1:
