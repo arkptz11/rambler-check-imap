@@ -58,7 +58,6 @@ class Rambler(Flow):
                 self.wait_click(
                     '//button[@data-cerber-id="login_form::main::login_button"]')
         except Exception as e:
-            print(e)
             pass
         ans = self.check_frame_and_window(
             frame, '//div[@class="rui-FieldStatus-message"]', cur, '//a[@data-list-view="settings"]')
