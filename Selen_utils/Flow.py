@@ -178,10 +178,10 @@ class Flow:
         # self.Logs_to_excel.append({'seed': self.seed,
         # 'result':res})
         self.count_make_accs.value += 1
-        txt = f'{self.data} -- {self.count_make_accs.value}/{self.count_accs}'
+        txt = f'{self.count_make_accs.value}/{self.count_accs}'
         if res != 'Success':
             print(Fore.RED + txt)
-            log.error(f'{self.data} -- {txt}')
+            log.error(f'{txt}')
             try:
                 self.driver.save_screenshot(
                     f'{homeDir}\\Screenshots_error\\{self.data.login}.png')
