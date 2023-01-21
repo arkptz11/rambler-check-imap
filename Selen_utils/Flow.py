@@ -1,6 +1,7 @@
 from .data_class import data_cl
 from .proxy import Proxy_Class
 from .captcha import Captcha
+from csv_utils import CsvCheck
 from config import csv
 import multiprocessing
 from loguru import logger as log
@@ -35,6 +36,7 @@ class Flow:
     driver: webdriver.Chrome = None
     wait: WebDriverWait = None
     ip: str = None
+    csv: CsvCheck = None
 
     def start_driver(self, anticaptcha_on=False, anticaptcha_path=None):
         self.activate_delay()
@@ -193,5 +195,5 @@ class Flow:
         df = df.append(_data, ignore_index=True)
         df.to_excel(rf'{homeDir}\\result.xlsx')
         self.Lock.release()
-        csv.add_string({'data': f'{self.data.string}'})
-        csv.save_csv()
+        self.csv.add_string({'data': f'{self.data.string}'})
+        self.csv.save_csv()
