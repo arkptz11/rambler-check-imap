@@ -37,9 +37,9 @@ class Rambler(Flow):
             self.wait_click('//a[@data-list-view="settings"]')
         except ElementClickInterceptedException:
             for i in range(3):
-                self.click_for_x_y(500,900)
+                self.click_for_x_y(1542,77)
                 sleep(0.3)
-            self.wait_click('//a[@data-list-view="settings"]')
+            self.go_setting()
 
     def login_rambler(self):
         self.get_new('https://mail.rambler.ru/settings/mailapps')
@@ -199,8 +199,8 @@ if __name__ == '__main__':
     with open(f'{homeDir}\\stop.txt', 'w') as file:
         pass
     Lock = multiprocessing.Lock()
-    threads_count = int(input(f"Сколько потоков требуется?"))
-    delay = input('Задержка(либо 1-2, либо 0)')
+    threads_count = int(input(f"Сколько потоков требуется? - "))
+    delay = input('Задержка(либо 1-2, либо 0) - ')
     flow = 0
     while True:
         while (not data_q.empty()):
