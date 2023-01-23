@@ -106,6 +106,12 @@ class Flow:
         except Exception as e:
             return 2
 
+    def click_for_x_y(self, x,y):
+        self.actions = ActionChains(self.driver)
+        self.actions.move_by_offset(x, y).click().perform()
+        self.actions.reset_actions()
+
+
     def close_driver(self):
         try:
             self.driver.quit()

@@ -14,6 +14,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
+from selenium.common.exceptions import ElementClickInterceptedException
 from dataclasses import dataclass
 import traceback
 import os
@@ -32,7 +33,13 @@ csv = cf.csv
 
 class Rambler(Flow):
     def go_setting(self):
-        self.wait_click('//a[@data-list-view="settings"]')
+        try:
+            self.wait_click('//a[@data-list-view="settings"]')
+        except ElementClickInterceptedException:
+            for i in range(3):
+                self.click_for_x_y(500,900)
+                sleep(0.3)
+            self.wait_click('//a[@data-list-view="settings"]')
 
     def login_rambler(self):
         self.get_new('https://mail.rambler.ru/settings/mailapps')
