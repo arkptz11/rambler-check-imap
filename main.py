@@ -72,6 +72,8 @@ class Rambler(Flow):
             elem = self.driver.find_element(By.XPATH, '//div[@class="rui-FieldStatus-message"]').text
             if 'Неправильная почта' in elem:
                 return 'Невалид'
+            else:
+                raise ValueError('Капча левая')
         self.driver.switch_to.window(cur)
 
     def switch_imap(self):
