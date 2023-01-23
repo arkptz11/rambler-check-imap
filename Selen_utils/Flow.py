@@ -185,7 +185,7 @@ class Flow:
         # 'result':res})
         self.count_make_accs.value += 1
         txt = f'{self.count_make_accs.value}/{self.count_accs}'
-        if res != 'Success':
+        if res != 'Success' or self.data.change_pass == 'Error' or self.data.on_off_imap == 'Error':
             print(Fore.RED + txt)
             log.error(f'{txt}')
             try:

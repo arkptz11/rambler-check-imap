@@ -69,7 +69,9 @@ class Rambler(Flow):
         ans = self.check_frame_and_window(
             frame, '//div[@class="rui-FieldStatus-message"]', cur, '//a[@data-list-view="settings"]')
         if ans == 1:
-            return 'Невалид'
+            elem = self.driver.find_element(By.XPATH, '//div[@class="rui-FieldStatus-message"]').text
+            if 'Неправильная почта' in elem:
+                return 'Невалид'
         self.driver.switch_to.window(cur)
 
     def switch_imap(self):
@@ -98,13 +100,13 @@ class Rambler(Flow):
         self.get_new(
             'https://id.rambler.ru/account/change-password?back=https://mail.rambler.ru/settings/security')
         old_pass = self.wait_and_return_elem(
-            '/html/body/div[4]/div/div/div/form/section[2]/div/div/div[1]/input')
+            '//input[@class="rui-Input-input -metrika-nokeys" and @id="password"]')
         if not Captcha.captcha_check(self.driver):
             return False
         else:
             old_pass.send_keys(self.data.password)
             self.wait_send(
-                '/html/body/div[4]/div/div/div/form/section[3]/div/div/div[1]/input', self.data.new_password)
+                '//input[@class="rui-Input-input -metrika-nokeys" and @id="newPassword"]', self.data.new_password)
             self.wait_click(
                 '/html/body/div[4]/div/div/div/form/footer/button[1]')
             sleep(2)
