@@ -1,5 +1,5 @@
-from Selen_utils import data_cl, Proxy_Class, Captcha, Flow
-from csv_utils import Execute
+from Selen_utils import data_cl, Proxy_Class, Captcha, Flow, Statuses
+from csv_utils import Execute, CsvCheck
 import config as cf
 import multiprocessing
 from loguru import logger as log
@@ -37,7 +37,7 @@ class Rambler(Flow):
             self.wait_click('//a[@data-list-view="settings"]')
         except ElementClickInterceptedException:
             for i in range(3):
-                self.click_for_x_y(1542,77)
+                self.click_for_x_y(1542, 77)
                 sleep(0.3)
             self.go_setting()
 
@@ -57,7 +57,7 @@ class Rambler(Flow):
             ans = self.wait_2_elements(
                 '//iframe[@data-hcaptcha-widget-id]', '//div[@class="rui-FieldStatus-message"]')
             if ans == 2:
-                return 'Невалид'
+                return Statuses.nevalid
             ans = self.wait_2_elements('//a[@href="/settings/accounts"]',
                                        Captcha.captcha_xpath)
             if ans == 2:
@@ -69,11 +69,12 @@ class Rambler(Flow):
         ans = self.check_frame_and_window(
             frame, '//div[@class="rui-FieldStatus-message"]', cur, '//a[@data-list-view="settings"]')
         if ans == 1:
-            elem = self.driver.find_element(By.XPATH, '//div[@class="rui-FieldStatus-message"]').text
+            elem = self.driver.find_element(
+                By.XPATH, '//div[@class="rui-FieldStatus-message"]').text
             if 'Неправильная почта' in elem:
-                return 'Невалид'
+                return Statuses.nevalid
             else:
-                raise ValueError('Капча левая')
+                return Statuses.left_captcha
         self.driver.switch_to.window(cur)
 
     def switch_imap(self):
@@ -135,13 +136,13 @@ class Rambler(Flow):
         for i in range(3):
             try:
                 _login = self.login_rambler()
-                if _login == 'Невалид':
+                if _login in [Statuses.nevalid, Statuses.left_captcha]:
                     return _login
                 break
             except:
                 self.restart_driver()
                 if i == 2:
-                    return 'Error'
+                    return Statuses.error
         log.debug(f'{self.data} -- login rambler')
         if self.data.on_off_imap:
             if self.check_imap(self.data.login, self.data.password):
@@ -153,10 +154,10 @@ class Rambler(Flow):
                         sleep(5)
                         if self.check_imap(self.data.login, self.data.password):
                             log.success(f'{self.data} -- imap включён')
-                            self.data.on_off_imap = 'Success'
+                            self.data.on_off_imap = Statuses.success
                             break
                         else:
-                            self.data.on_off_imap = 'Error'
+                            self.data.on_off_imap = Statuses.error
                             imap_on = False
 
                     else:
@@ -171,13 +172,13 @@ class Rambler(Flow):
                     sleep(5)
                     if self.check_imap(self.data.login, self.data.new_password):
                         log.success(f'{self.data} -- пас поменяли')
-                        self.data.change_pass = 'Success'
+                        self.data.change_pass = Statuses.success
                         break
                     else:
                         log.error(f'{self.data} -- Пас не сменился')
-                        self.data.change_pass = 'Error'
+                        self.data.change_pass = Statuses.error
                         change_pass = False
-        return 'Success'
+        return Statuses.success
 
     def start(self,):
         self.zapysk([self.go])
@@ -189,12 +190,9 @@ if __name__ == '__main__':
     Logs_to_excel = m.list()
     counter = multiprocessing.Value('i', 0)
     proxy_list = m.list()
-    try:
-        df = pd.read_excel(rf'{homeDir}\\result.xlsx', index_col=0)
-    except:
-        df = pd.DataFrame(columns=['mail', 'pass', 'imap'])
-        df.to_excel(rf'{homeDir}\\result.xlsx')
-
+    excel_file = CsvCheck(name_file=rf'{homeDir}\\result.xlsx', colums_check=[
+                          'mail', 'pass', 'imap'], type_file='excel')
+    excel_file.check_file()
     data_q = datas.get_queue()
     with open(f'{homeDir}\\txt\\proxy.txt') as file:
         for i in file.read().split('\n'):
@@ -220,7 +218,7 @@ if __name__ == '__main__':
                     # proxx.change_ip()
                     proxy_list.remove(proxx)
                     t = multiprocessing.Process(
-                        target=Rambler(data, proxx, Lock, proxy_list, delay, csv=csv, count_accs=datas.count_args, count_make_accs=counter).start)
+                        target=Rambler(data, proxx, Lock, proxy_list, delay, csv=csv, count_accs=datas.count_args, count_make_accs=counter, excel_file=excel_file).start)
                     t.start()
                     flow += 1
         while len(multiprocessing.active_children()) != 1:

@@ -1,4 +1,4 @@
-from .data_class import data_cl
+from .data_class import data_cl, Statuses
 from .proxy import Proxy_Class
 from .captcha import Captcha
 from csv_utils import CsvCheck
@@ -41,6 +41,7 @@ class Flow:
     csv: CsvCheck = None
     count_accs: int = None
     count_make_accs: multiprocessing.Value = None
+    excel_file: CsvCheck = None
 
     def start_driver(self, anticaptcha_on=False, anticaptcha_path=None):
         self.activate_delay()
@@ -92,7 +93,8 @@ class Flow:
                 self.driver.get(link)
                 return True
             except Exception as e:
-                log.debug(f'{self.data} -- get_new -- {traceback.format_exc()}')
+                log.debug(
+                    f'{self.data} -- get_new -- {traceback.format_exc()}')
             if num == 14:
                 raise Exception
 
@@ -106,11 +108,10 @@ class Flow:
         except Exception as e:
             return 2
 
-    def click_for_x_y(self, x,y):
+    def click_for_x_y(self, x, y):
         self.actions = ActionChains(self.driver)
         self.actions.move_by_offset(x, y).click().perform()
         self.actions.reset_actions()
-
 
     def close_driver(self):
         try:
@@ -170,22 +171,34 @@ class Flow:
         self.wait.until(lambda x: x.find_element(By.XPATH, xpath))
         self.driver.find_element(By.XPATH, xpath).send_keys(keys)
 
+    def run(self, list_func, attempts=2):
+        for i in range(2):
+            res = ''
+            for func in list_func:
+                try:
+                    res = func()
+                except Exception as e:
+                    res = Statuses.error
+                    log.debug(f'{self.data} -- {traceback.format_exc()}')
+                    break
+                if res != Statuses.success:
+                    break
+            if not self._check_valid_thread(res) and i == 1 and res != Statuses.nevalid:
+                self.restart_driver()
+                continue
+            break
+        return res
+
+    def _check_valid_thread(self, res):
+        if res != Statuses.success or self.data.change_pass == Statuses.error or self.data.on_off_imap == Statuses.error:
+            return False
+        return True
+
     def zapysk(self, list_func):
-        res = ''
-        for func in list_func:
-            try:
-                res = func()
-            except Exception as e:
-                res = "Error"
-                log.debug(f'{self.data} -- {traceback.format_exc()}')
-                break
-            if res != 'Success':
-                break
-        # self.Logs_to_excel.append({'seed': self.seed,
-        # 'result':res})
+        res = self.run(list_func)
         self.count_make_accs.value += 1
         txt = f'{self.count_make_accs.value}/{self.count_accs}'
-        if res != 'Success' or self.data.change_pass == 'Error' or self.data.on_off_imap == 'Error':
+        if not self._check_valid_thread(res):
             print(Fore.RED + txt)
             log.error(f'{txt}')
             try:
@@ -198,16 +211,12 @@ class Flow:
             print(Fore.GREEN + txt)
         self.close_driver()
         self.proxy_list.append(self.proxy)
-        self.Lock.acquire()
-        df = pd.read_excel(rf'{homeDir}\\result.xlsx', index_col=0)
         _data = {'mail': self.data.string, 'result': res}
-
         if self.data.on_off_imap:
             _data['imap'] = self.data.on_off_imap
         if self.data.change_pass:
             _data['pass'] = self.data.change_pass
-        df = df.append(_data, ignore_index=True)
-        df.to_excel(rf'{homeDir}\\result.xlsx')
-        self.Lock.release()
+        self.excel_file.add_string(_data)
+        self.excel_file.save_file()
         self.csv.add_string({'data': f'{self.data.string}'})
-        self.csv.save_csv()
+        self.csv.save_file()

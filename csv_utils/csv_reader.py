@@ -10,14 +10,23 @@ from .decorators import true_false
 class CsvCheck:
     name_file: str
     colums_check: list[str]
-    Lock: multiprocessing.Lock
+    Lock: multiprocessing.Lock = multiprocessing.Lock()
     df: pd.DataFrame = pd.DataFrame()
+    type_file: str = 'csv'
+
+    def _read_file(self):
+        if self.type_file == 'csv':
+            self.df = pd.read_csv(self.name_file, index_col=0)
+        elif self.type_file == 'excel':
+            self.df = pd.read_excel(self.name_file, index_col=0)
 
     @true_false
-    def _check_csv_file(self) -> bool:
-        self.Lock.acquire()
-        self.df = pd.read_csv(self.name_file, index_col=0)
-        self.Lock.release()
+    def _check_file(self, need_lock=True) -> bool:
+        if need_lock:
+            self.Lock.acquire()
+        self._read_file()
+        if need_lock:
+            self.Lock.release()
 
     @true_false
     def _check_columns(self) -> bool:
@@ -27,25 +36,26 @@ class CsvCheck:
         if len(self.colums_check) != len(self.df.columns):
             raise
 
-    def check_csv(self):
-        if not self._check_csv_file() or (not self._check_columns()):
-            self.create_csv()
+    def check_file(self, need_lock=True):
+        if not self._check_file(need_lock=need_lock) or (not self._check_columns()):
+            self.create_file()
 
-    def create_csv(self):
+    def create_file(self):
         self.df = pd.DataFrame(columns=self.colums_check)
-        self.df.to_csv(self.name_file)
+        self.save_file()
 
-    def update_df(self):
-        self.check_csv()
 
-    def save_csv(self):
+    def save_file(self):
         self.Lock.acquire()
-        self.df.to_csv(self.name_file)
+        if self.type_file == 'csv':
+            self.df.to_csv(self.name_file)
+        elif self.type_file == 'excel':
+            self.df.to_excel(self.name_file)
         self.Lock.release()
 
     def add_string(self, data):
-        self.update_df()
         self.Lock.acquire()
+        self.check_file(need_lock=False)
         self.df = self.df.append(data, ignore_index=True)
         self.Lock.release()
 
@@ -63,7 +73,7 @@ class Execute:
         self.formater = formater
         self.csv = CsvCheck(name_file=self.name_csv_file,
                             colums_check=self.list_columns, Lock=multiprocessing.Lock())
-        self.csv.check_csv()
+        self.csv.check_file()
 
     def get_queue(self) -> multiprocessing.Queue:
         counter = 0
@@ -82,7 +92,7 @@ class Execute:
         return q
 
     def get_list_on_df(self) -> pd.DataFrame:
-        self.csv.check_csv()
+        self.csv.check_file()
         df = self.csv.df
         return df[self.target_column].to_list()
 

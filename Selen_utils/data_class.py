@@ -29,3 +29,10 @@ class data_cl:
         else:
             logger.error(f'Ошибка ввода данных: {string}')
             sys.exit()
+
+
+class Statuses:
+    error = 'Error'
+    success = 'Success'
+    nevalid = 'Невалид'
+    left_captcha = 'Левая капча'
