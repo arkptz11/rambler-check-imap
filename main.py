@@ -191,7 +191,7 @@ if __name__ == '__main__':
     counter = multiprocessing.Value('i', 0)
     proxy_list = m.list()
     excel_file = CsvCheck(name_file=rf'{homeDir}\\result.xlsx', colums_check=[
-                          'mail', 'pass', 'imap'], type_file='excel')
+                          'mail', 'pass', 'imap', 'imap', 'mail', 'result'], type_file='excel')
     excel_file.check_file()
     data_q = datas.get_queue()
     with open(f'{homeDir}\\txt\\proxy.txt') as file:
