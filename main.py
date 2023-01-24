@@ -141,9 +141,10 @@ class Rambler(Flow):
                     return _login
                 break
             except:
-                self.restart_driver()
+                self.log_error(desc='Ошибка во время логина')
                 if i == 2:
                     return Statuses.error
+                self.restart_driver()
         log.debug(f'{self.data} -- login rambler')
         if self.data.on_off_imap:
             if self.check_imap(self.data.login, self.data.password):
@@ -179,6 +180,8 @@ class Rambler(Flow):
                         log.error(f'{self.data} -- Пас не сменился')
                         self.data.change_pass = Statuses.error
                         change_pass = False
+                else:
+                    self.get_new('https://mail.rambler.ru/settings/mailapps')
         return Statuses.success
 
     def start(self,):

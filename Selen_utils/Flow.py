@@ -43,7 +43,7 @@ class Flow:
     count_make_accs: multiprocessing.Value = None
     excel_file: CsvCheck = None
 
-    def start_driver(self, anticaptcha_on=False, anticaptcha_path=None):
+    def start_driver(self, anticaptcha_on=False, anticaptcha_path=None, headless=False):
         self.activate_delay()
         # self.ads.creade_ads_profile(cookie=self.cookie)
         # self.driver = self.ads.connect_to_ads_selenium(self.ads.start_ads_profile())
@@ -58,6 +58,8 @@ class Flow:
                    {'http': f'http://{self.proxy.url_proxy}',
                     'http': f'https://{self.proxy.url_proxy}', }}
         options_c.add_argument(f"user-agent={ua.random}")
+        if headless:
+            options_c.add_argument("--headless")
         options_c.add_experimental_option(
             'excludeSwitches', ['enable-logging'])
         if anticaptcha_on:
@@ -171,6 +173,9 @@ class Flow:
         self.wait.until(lambda x: x.find_element(By.XPATH, xpath))
         self.driver.find_element(By.XPATH, xpath).send_keys(keys)
 
+    def log_error(self, desc=None):
+        log.debug(f'{self.data} -- {traceback.format_exc()}' + f' -- {desc}' if desc else '')
+
     def run(self, list_func, attempts=2):
         for i in range(2):
             res = ''
@@ -187,6 +192,9 @@ class Flow:
                 self.restart_driver()
                 continue
             break
+        if not self._check_valid_thread(res):
+            if res == Statuses.success:
+                return 'Error'
         return res
 
     def _check_valid_thread(self, res):
