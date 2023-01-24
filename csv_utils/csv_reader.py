@@ -36,12 +36,19 @@ class CsvCheck:
         if len(self.colums_check) != len(self.df.columns):
             raise
 
+    def _unlock(self):
+        try:
+            self.Lock.release()
+        except:
+            pass
+
     def check_file(self, need_lock=True):
         if not self._check_file(need_lock=need_lock) or (not self._check_columns()):
             self.create_file()
 
     def create_file(self):
         self.df = pd.DataFrame(columns=self.colums_check)
+        self._unlock()
         self.save_file()
 
 
