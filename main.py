@@ -112,7 +112,7 @@ class Rambler(Flow):
                 '//input[@class="rui-Input-input -metrika-nokeys" and @id="newPassword"]', self.data.new_password)
             self.wait_click(
                 '/html/body/div[4]/div/div/div/form/footer/button[1]')
-            sleep(2)
+            sleep(5)
             return True
 
     def check_imap(self, log, pas):
