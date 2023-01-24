@@ -38,6 +38,7 @@ class CsvCheck:
 
     def check_file(self, need_lock=True):
         if not self._check_file(need_lock=need_lock) or (not self._check_columns()):
+            print('ttt')
             self.create_file()
 
     def create_file(self):
