@@ -95,7 +95,7 @@ class Flow:
                 self.driver.get(link)
                 return True
             except Exception as e:
-                log.debug(
+                self.log_debug_with_lock(
                     f'{self.data} -- get_new -- {traceback.format_exc()}')
             if num == 14:
                 raise Exception
@@ -169,12 +169,17 @@ class Flow:
         self.driver.find_element(By.XPATH, xpath).click()
         self.wait = WebDriverWait(self.driver, 30)
 
+    def log_debug_with_lock(self, text:str):
+        self.Lock.acquire()
+        log.debug(text)
+        self.Lock.release()
+
     def wait_send(self, xpath, keys):
         self.wait.until(lambda x: x.find_element(By.XPATH, xpath))
         self.driver.find_element(By.XPATH, xpath).send_keys(keys)
 
     def log_error(self, desc=None):
-        log.debug(f'{self.data} -- {traceback.format_exc()}' + f' -- {desc}' if desc else '')
+        self.log_debug_with_lock(f'{self.data} -- {traceback.format_exc()}' + f' -- {desc}' if desc else '')
 
     def run(self, list_func, attempts=2):
         for i in range(2):
@@ -184,7 +189,7 @@ class Flow:
                     res = func()
                 except Exception as e:
                     res = Statuses.error
-                    log.debug(f'{self.data} -- {traceback.format_exc()}')
+                    self.log_debug_with_lock(f'{self.data} -- {traceback.format_exc()}')
                     break
                 if res != Statuses.success:
                     break
@@ -213,7 +218,7 @@ class Flow:
                 self.driver.save_screenshot(
                     f'{homeDir}\\Screenshots_error\\{self.data.login}.png')
             except Exception as e:
-                log.debug(f'{self.data} -- {traceback.format_exc()}')
+                self.log_debug_with_lock(f'{self.data} -- {traceback.format_exc()}')
                 pass
         else:
             print(Fore.GREEN + txt)

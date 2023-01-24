@@ -79,19 +79,19 @@ class Rambler(Flow):
 
     def switch_imap(self):
         self.go_setting()
-        log.debug(f'{self.data} -- go_setting')
+        self.log_debug_with_lock(f'{self.data} -- go_setting')
         self.wait_click('//a[@href="/settings/mailapps"]')
-        log.debug(f'{self.data} -- mailapps')
+        self.log_debug_with_lock(f'{self.data} -- mailapps')
         elem = self.wait_and_return_elem(
             '//button[contains(@class, "rui-ToggleOption-toggleOption") and @value="true"]', sleeps=5)
-        log.debug(f'{self.data} -- ищем элем вкл')
+        self.log_debug_with_lock(f'{self.data} -- ищем элем вкл')
         val = elem.get_attribute('aria-pressed')
         if val == 'true':
-            log.debug(f'{self.data} -- imap уже включён')
+            self.log_debug_with_lock(f'{self.data} -- imap уже включён')
             return True
         else:
             elem.click()
-            log.debug(f'{self.data} -- кликнули по элементу, ждём капчу')
+            self.log_debug_with_lock(f'{self.data} -- кликнули по элементу, ждём капчу')
             if not Captcha.captcha_check(self.driver):
                 return False
             else:
@@ -124,16 +124,16 @@ class Rambler(Flow):
             return False
 
     def restart_driver(self):
-        log.debug(f'{self.data} -- restart_driver')
+        self.log_debug_with_lock(f'{self.data} -- restart_driver')
         self.close_driver()
         self.start_driver(
             anticaptcha_on=True, anticaptcha_path=f'{homeDir}\\files\\anticaptcha-plugin_v0.63.zip')
         self.activate_anti_captcha()
 
     def go(self,):
-        log.debug(f'Старт потока {self.data}')
+        self.log_debug_with_lock(f'Старт потока {self.data}')
         self.restart_driver()
-        log.debug('activate anti-captcha')
+        self.log_debug_with_lock('activate anti-captcha')
         for i in range(3):
             try:
                 _login = self.login_rambler()
@@ -145,7 +145,7 @@ class Rambler(Flow):
                 if i == 2:
                     return Statuses.error
                 self.restart_driver()
-        log.debug(f'{self.data} -- login rambler')
+        self.log_debug_with_lock(f'{self.data} -- login rambler')
         if self.data.on_off_imap:
             if self.check_imap(self.data.login, self.data.password):
                 self.data.on_off_imap = 'Уже был включен'
