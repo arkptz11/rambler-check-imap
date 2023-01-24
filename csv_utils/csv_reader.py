@@ -45,18 +45,21 @@ class CsvCheck:
         self.save_file()
 
 
-    def save_file(self):
-        self.Lock.acquire()
+    def save_file(self, need_lock=True):
+        if need_lock:
+            self.Lock.acquire()
         if self.type_file == 'csv':
             self.df.to_csv(self.name_file)
         elif self.type_file == 'excel':
             self.df.to_excel(self.name_file)
-        self.Lock.release()
+        if need_lock:
+            self.Lock.release()
 
     def add_string(self, data):
         self.Lock.acquire()
         self.check_file(need_lock=False)
         self.df = self.df.append(data, ignore_index=True)
+        self.save_file(need_lock=False)
         self.Lock.release()
 
 

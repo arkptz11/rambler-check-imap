@@ -217,6 +217,4 @@ class Flow:
         if self.data.change_pass:
             _data['pass'] = self.data.change_pass
         self.excel_file.add_string(_data)
-        self.excel_file.save_file()
         self.csv.add_string({'data': f'{self.data.string}'})
-        self.csv.save_file()
