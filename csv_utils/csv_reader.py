@@ -38,7 +38,6 @@ class CsvCheck:
 
     def check_file(self, need_lock=True):
         if not self._check_file(need_lock=need_lock) or (not self._check_columns()):
-            print('ttt')
             self.create_file()
 
     def create_file(self):
@@ -49,6 +48,7 @@ class CsvCheck:
     def save_file(self, need_lock=True):
         if need_lock:
             self.Lock.acquire()
+            print('//')
         if self.type_file == 'csv':
             self.df.to_csv(self.name_file)
         elif self.type_file == 'excel':
