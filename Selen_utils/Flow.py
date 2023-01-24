@@ -96,7 +96,7 @@ class Flow:
                 return True
             except Exception as e:
                 self.log_debug_with_lock(
-                    f'{self.data} -- get_new -- {traceback.format_exc()}')
+                    f'{self.data} -- get_new ({link}-- {traceback.format_exc()}')
             if num == 14:
                 raise Exception
 

@@ -111,7 +111,7 @@ class Rambler(Flow):
             self.wait_send(
                 '//input[@class="rui-Input-input -metrika-nokeys" and @id="newPassword"]', self.data.new_password)
             self.wait_click(
-                '/html/body/div[4]/div/div/div/form/footer/button[1]')
+                '//button[@data-cerber-id="profile::change_password::save_password_button"]')
             sleep(5)
             return True
 
@@ -166,7 +166,7 @@ class Rambler(Flow):
                         self.get_new(
                             'https://mail.rambler.ru/folder/INBOX')
                         sleep(5)
-                log.success(f'{self.data} -- end')
+                log.success(f'{self.data} -- end switch imap')
         if self.data.change_pass and self.check_imap(self.data.login, self.data.password):
             for i in range(3):
                 change_pass = self.change_pass()
