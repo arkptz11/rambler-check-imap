@@ -4,7 +4,6 @@ from .captcha import Captcha
 from csv_utils import CsvCheck
 from config import csv
 import multiprocessing
-from loguru import logger as log
 from seleniumwire import webdriver
 from fake_useragent import UserAgent
 from selenium.webdriver.chrome.options import Options
@@ -16,6 +15,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.select import Select
 from dataclasses import dataclass
 from colorama import Fore
+from loguru import logger
 import os
 import pandas as pd
 from time import sleep, time
@@ -43,6 +43,7 @@ class Flow:
     count_accs: int = None
     count_make_accs: multiprocessing.Value = None
     excel_file: CsvCheck = None
+    log:logger =None
 
     def start_driver(self, anticaptcha_on=False, anticaptcha_path=None, headless=False):
         self.activate_delay()
@@ -172,7 +173,7 @@ class Flow:
 
     def log_debug_with_lock(self, text: str):
         self.Lock.acquire()
-        log.debug(text)
+        self.log.debug(text)
         self.Lock.release()
 
     def wait_send(self, xpath, keys):
