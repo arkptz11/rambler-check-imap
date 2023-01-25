@@ -73,7 +73,7 @@ class Flow:
         if self.proxy.proxy_link:
             self.proxy.change_ip()
         self.ip = self.proxy.check_connection()
-        log.success(self.ip)
+        self.log_debug_with_lock(self.ip)
         self.driver.switch_to.window(self.driver.window_handles[-1])
 
     def activate_delay(self):
@@ -213,7 +213,7 @@ class Flow:
         txt = f'{self.count_make_accs.value}/{self.count_accs}' + dop_txt
         if not self._check_valid_thread(res):
             print(Fore.RED + txt)
-            log.error(f'{txt}')
+            self.log_debug_with_lock(f'{txt}')
             try:
                 self.driver.save_screenshot(
                     f'{homeDir}\\Screenshots_error\\{self.data.login}.png')
