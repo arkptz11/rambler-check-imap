@@ -31,6 +31,7 @@ homeDir = (r'\\').join(os.path.abspath(__file__).split('\\')[:-2])
 @dataclass
 class Flow:
     data: data_cl
+    data_q: multiprocessing.Queue
     proxy: Proxy_Class
     Lock: multiprocessing.Lock
     proxy_list: list
@@ -169,7 +170,7 @@ class Flow:
         self.driver.find_element(By.XPATH, xpath).click()
         self.wait = WebDriverWait(self.driver, 30)
 
-    def log_debug_with_lock(self, text:str):
+    def log_debug_with_lock(self, text: str):
         self.Lock.acquire()
         log.debug(text)
         self.Lock.release()
@@ -179,28 +180,26 @@ class Flow:
         self.driver.find_element(By.XPATH, xpath).send_keys(keys)
 
     def log_error(self, desc=None):
-        self.log_debug_with_lock(f'{self.data} -- {traceback.format_exc()}' + f' -- {desc}' if desc else '')
+        self.log_debug_with_lock(
+            f'{self.data} -- {traceback.format_exc()}' + f' -- {desc}' if desc else '')
 
     def run(self, list_func, attempts=2):
-        for i in range(2):
-            res = ''
-            for func in list_func:
-                try:
-                    res = func()
-                except Exception as e:
-                    res = Statuses.error
-                    self.log_debug_with_lock(f'{self.data} -- {traceback.format_exc()}')
-                    break
-                if res != Statuses.success:
-                    break
-            if not self._check_valid_thread(res) and i == 1 and res != Statuses.nevalid:
-                self.restart_driver()
-                continue
-            break
+        res = ''
+        add_to_end = False
+        for func in list_func:
+            try:
+                res = func()
+            except Exception as e:
+                res = Statuses.error
+                self.log_debug_with_lock(
+                    f'{self.data} -- {traceback.format_exc()}')
+        if not self._check_valid_thread(res) and res != Statuses.nevalid:
+            self.data_q.put(self.data)
+            add_to_end = True
         if not self._check_valid_thread(res):
             if res == Statuses.success:
                 return 'Error'
-        return res
+        return res, add_to_end
 
     def _check_valid_thread(self, res):
         if res != Statuses.success or self.data.change_pass == Statuses.error or self.data.on_off_imap == Statuses.error:
@@ -208,9 +207,10 @@ class Flow:
         return True
 
     def zapysk(self, list_func):
-        res = self.run(list_func)
+        res, add_to_end = self.run(list_func)
         self.count_make_accs.value += 1
-        txt = f'{self.count_make_accs.value}/{self.count_accs}'
+        dop_txt = (' -- Перенос в конец очереди' if add_to_end else '')
+        txt = f'{self.count_make_accs.value}/{self.count_accs}' + dop_txt
         if not self._check_valid_thread(res):
             print(Fore.RED + txt)
             log.error(f'{txt}')
@@ -218,16 +218,18 @@ class Flow:
                 self.driver.save_screenshot(
                     f'{homeDir}\\Screenshots_error\\{self.data.login}.png')
             except Exception as e:
-                self.log_debug_with_lock(f'{self.data} -- {traceback.format_exc()}')
+                self.log_debug_with_lock(
+                    f'{self.data} -- {traceback.format_exc()}')
                 pass
         else:
             print(Fore.GREEN + txt)
         self.close_driver()
         self.proxy_list.append(self.proxy)
-        _data = {'mail': self.data.string, 'result': res}
+        _data = {'mail': self.data.string, 'result': f'{res}{dop_txt}'}
         if self.data.on_off_imap:
             _data['imap'] = self.data.on_off_imap
         if self.data.change_pass:
             _data['pass'] = self.data.change_pass
         self.excel_file.add_string(_data)
-        self.csv.add_string({'data': f'{self.data.string}'})
+        if not add_to_end:
+            self.csv.add_string({'data': f'{self.data.string}'})

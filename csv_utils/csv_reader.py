@@ -88,7 +88,7 @@ class Execute:
 
     def get_queue(self) -> multiprocessing.Queue:
         counter = 0
-        q = queue.Queue()
+        q = multiprocessing.Queue()
         with open(self.name_file, 'r', encoding='utf-8') as file:
             data = file.read().split('\n')
             data = self.clear_empty_line(data=data)
