@@ -155,7 +155,7 @@ class Rambler(Flow):
                     if imap_on:
                         sleep(5)
                         if self.check_imap(self.data.login, self.data.password):
-                            log.success(f'{self.data} -- imap включён')
+                            self.log_debug_with_lock(f'{self.data} -- imap включён')
                             self.data.on_off_imap = Statuses.success
                             break
                         else:
@@ -166,18 +166,18 @@ class Rambler(Flow):
                         self.get_new(
                             'https://mail.rambler.ru/folder/INBOX')
                         sleep(5)
-                log.success(f'{self.data} -- end switch imap')
+                self.log_debug_with_lock(f'{self.data} -- end switch imap')
         if self.data.change_pass and self.check_imap(self.data.login, self.data.password):
             for i in range(3):
                 change_pass = self.change_pass()
                 if change_pass:
                     sleep(5)
                     if self.check_imap(self.data.login, self.data.new_password):
-                        log.success(f'{self.data} -- пас поменяли')
+                        self.log_debug_with_lock(f'{self.data} -- пас поменяли')
                         self.data.change_pass = Statuses.success
                         break
                     else:
-                        log.error(f'{self.data} -- Пас не сменился')
+                        self.log_debug_with_lock(f'{self.data} -- Пас не сменился')
                         self.data.change_pass = Statuses.error
                         change_pass = False
                 else:
