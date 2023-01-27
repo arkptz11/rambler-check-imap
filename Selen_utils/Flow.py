@@ -197,9 +197,9 @@ class Flow:
         if not self._check_valid_thread(res) and res != Statuses.nevalid:
             self.data_q.put(self.data)
             add_to_end = True
-        if not self._check_valid_thread(res):
+        elif not self._check_valid_thread(res):
             if res == Statuses.success:
-                return 'Error'
+                return 'Error', add_to_end
         return res, add_to_end
 
     def _check_valid_thread(self, res):
