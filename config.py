@@ -1,6 +1,5 @@
 import os
-from csv_utils import Execute
-from Selen_utils import data_cl
+from csv_utils import Execute, data_cl
 homeDir = (r'\\').join(os.path.abspath(__file__).split('\\')[:-1])
 
 
