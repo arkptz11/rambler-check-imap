@@ -40,7 +40,7 @@ class Rambler():
             self.data: data_cl = self.data_q.get()
             rs = self.check_imap()
             res = Statuses.success if rs else Statuses.error
-            color = Fore.GREEN if res else Fore.RED
+            color = Fore.GREEN if rs else Fore.RED
             self.lock.acquire()
             self.counter.value += 1
             print(color + f'{self.counter.value}/{self.full}')
